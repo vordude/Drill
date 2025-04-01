@@ -24,13 +24,13 @@ export default function RootLayout() {
       <Stack.Screen 
         name="index"
         options={{ 
-          title: 'Drill Settings',
+          title: 'Sow Smart',
         }}
       />
       <Stack.Screen 
         name="calibration"
         options={{
-          title: 'Calibration',
+          title: 'Sow Smart',
           headerBackTitle: 'Settings',
         }}
       />

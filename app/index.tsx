@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
+import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView, Platform, Pressable, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
@@ -113,12 +113,17 @@ export default function ConfigScreen() {
   };
 
   return (
+    <ImageBackground 
+      source={require('../assets/images/row.jpg')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Configuration</Text>
+        <Text style={styles.title}>Drill Configuration</Text>
         
         <View style={styles.section}>
           
@@ -172,13 +177,19 @@ export default function ConfigScreen() {
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
   },
   scrollView: {
     flex: 1,
