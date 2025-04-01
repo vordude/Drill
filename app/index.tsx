@@ -123,47 +123,55 @@ export default function ConfigScreen() {
       style={styles.container}
     >
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Drill Configuration</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Drill Configuration</Text>
+        </View>
         
         <View style={styles.section}>
           
           <View style={styles.inputRow}>
             <Text style={styles.label}>Drill Width (feet):</Text>
-            <TextInput
-              ref={drillWidthRef}
-              style={[styles.input, !drillWidth && styles.inputEmpty]}
-              defaultValue={drillWidth}
-              onChangeText={setCurrentDrillWidth}
-              onBlur={handleDrillWidthBlur}
-              keyboardType="decimal-pad"
-              editable={true}
-            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                ref={drillWidthRef}
+                style={[styles.input, !drillWidth && styles.inputEmpty]}
+                defaultValue={drillWidth}
+                onChangeText={setCurrentDrillWidth}
+                onBlur={handleDrillWidthBlur}
+                keyboardType="decimal-pad"
+                editable={true}
+              />
+            </View>
           </View>
 
           <View style={styles.inputRow}>
             <Text style={styles.label}>Row Spacing (in):</Text>
-            <TextInput
-              ref={rowSpacingRef}
-              style={[styles.input, !rowSpacing && styles.inputEmpty]}
-              defaultValue={rowSpacing}
-              onChangeText={setCurrentRowSpacing}
-              onBlur={handleRowSpacingBlur}
-              keyboardType="decimal-pad"
-              editable={true}
-            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                ref={rowSpacingRef}
+                style={[styles.input, !rowSpacing && styles.inputEmpty]}
+                defaultValue={rowSpacing}
+                onChangeText={setCurrentRowSpacing}
+                onBlur={handleRowSpacingBlur}
+                keyboardType="decimal-pad"
+                editable={true}
+              />
+            </View>
           </View>
 
           <View style={styles.inputRow}>
             <Text style={styles.label}>Simulated Distance Per Turn (in):</Text>
-            <TextInput
-              ref={distancePerTurnRef}
-              style={[styles.input, !distancePerTurn && styles.inputEmpty]}
-              defaultValue={distancePerTurn}
-              onChangeText={setCurrentDistance}
-              onBlur={handleDistanceBlur}
-              keyboardType="decimal-pad"
-              editable={true}
-            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                ref={distancePerTurnRef}
+                style={[styles.input, !distancePerTurn && styles.inputEmpty]}
+                defaultValue={distancePerTurn}
+                onChangeText={setCurrentDistance}
+                onBlur={handleDistanceBlur}
+                keyboardType="decimal-pad"
+                editable={true}
+              />
+            </View>
           </View>
         </View>
 
@@ -197,18 +205,27 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
   },
+  titleContainer: {
+    backgroundColor: '#847b74',
+    padding: 15,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    width: '80%',
+    alignSelf: 'center',
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#2c6e49',
-    marginBottom: 20,
+    color: '#fff',
     textAlign: 'center',
   },
   section: {
-    marginBottom: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'rgba(245, 245, 245, 0.7)',
     padding: 15,
-    borderRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    width: '80%',
+    alignSelf: 'center',
   },
   sectionTitle: {
     fontSize: 18,
@@ -220,14 +237,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    width: '100%',
   },
   label: {
-    flex: 1,
+    width: '50%',
     fontSize: 16,
     color: '#333',
+    textAlign: 'right',
+    paddingRight: 10,
+    fontWeight: 'bold',
+  },
+  inputContainer: {
+    width: '50%',
+    paddingLeft: 10,
   },
   input: {
-    flex: 1,
+    width: 100,
     height: 40,
     borderWidth: 1,
     borderColor: '#ccc',
@@ -235,6 +260,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#fff',
     fontSize: 16,
+    textAlign: 'right',
   },
   inputEmpty: {
     borderColor: '#ff0000',

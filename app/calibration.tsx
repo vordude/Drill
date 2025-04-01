@@ -139,15 +139,12 @@ export default function CalibrationScreen() {
             
             <View style={styles.inputRow}>
               <Text style={styles.label}>Number of Turns:</Text>
-              <View 
-                style={[styles.pickerContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}
-                >
+              <View style={styles.pickerContainer}>
                 <Picker
                   selectedValue={numberOfTurns}
                   onValueChange={(value) => setNumberOfTurns(value.toString())}
-                  style={[styles.picker, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}
-                  itemStyle={{height: 50, fontSize: 16}}
-                  >
+                  style={styles.picker}
+                >
                   {TURN_OPTIONS.map((turns) => (
                     <Picker.Item 
                       key={turns} 
@@ -166,7 +163,7 @@ export default function CalibrationScreen() {
                 value={rowsCaught}
                 onChangeText={validateRowsCaught}
                 keyboardType="number-pad"
-                placeholder={`Max ${calculateTotalRows(parseFloat(drillWidth || '0'), parseFloat(rowSpacing || '1'))} rows`}
+                placeholder=" "
               />
             </View>
 
@@ -177,7 +174,7 @@ export default function CalibrationScreen() {
                 value={seedWeight}
                 onChangeText={validateSeedWeight}
                 keyboardType="decimal-pad"
-                placeholder="Enter weight"
+                placeholder=" "
               />
             </View>
           </View>
@@ -187,7 +184,7 @@ export default function CalibrationScreen() {
             <Text style={styles.result}>{poundsPerAcre} lbs/acre</Text>
           </View>
 
-          <View style={[styles.settingsPreview, { backgroundColor: 'rgba(255, 255, 255, 0.85)' }]}>
+          <View style={[styles.settingsPreview, { backgroundColor: 'rgba(245, 245, 245, 0.85)' }]}>
             <Text style={styles.settingsTitle}>Current Settings</Text>
             <Text style={styles.settingsText}>Width: {drillWidth} feet</Text>
             <Text style={styles.settingsText}>Spacing: {rowSpacing} inches</Text>
@@ -221,6 +218,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(245, 245, 245, 0.7)',
     padding: 15,
     borderRadius: 10,
+    width: '80%',
+    alignSelf: 'center',
   },
   sectionTitle: {
     fontSize: 18,
@@ -232,14 +231,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    width: '100%',
+    paddingLeft: '25%',
+    paddingRight: '10%',
   },
   label: {
-    flex: 1,
+    width: 140,
     fontSize: 16,
     color: '#333',
+    textAlign: 'right',
+    paddingRight: 10,
+    fontWeight: 'bold',
   },
   input: {
-    flex: 1,
+    width: 100,
     height: 40,
     borderWidth: 1,
     borderColor: '#ccc',
@@ -247,27 +252,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#fff',
     fontSize: 16,
+    textAlign: 'right',
   },
   inputEmpty: {
     borderColor: '#ff0000',
   },
   pickerContainer: {
-    flex: 1,
+    width: 100,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     backgroundColor: '#fff',
     height: 50,
     justifyContent: 'center',
-    paddingHorizontal: 2,
     overflow: 'hidden',
   },
   picker: {
     height: 50,
-    marginHorizontal: Platform.OS === 'android' ? 0 : -8,
     width: '100%',
-    color: '#333',
-    fontSize: 16,
+    paddingLeft: 10,
+    paddingRight: 10,
+    textAlign: 'right',
   },
   resultSection: {
     alignItems: 'center',
@@ -288,19 +293,24 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   settingsPreview: {
-    backgroundColor: 'rgba(245, 245, 245, 0.7)',
+    backgroundColor: 'rgba(245, 245, 245, 0.85)',
     padding: 15,
     borderRadius: 10,
+    width: '55%',
+    alignSelf: 'center',
   },
   settingsTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
     color: '#2c6e49',
     marginBottom: 8,
+    textAlign: 'center',
   },
   settingsText: {
     fontSize: 14,
     color: '#333',
     marginBottom: 4,
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 }); 
