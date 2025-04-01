@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   section: {
-    backgroundColor: 'rgba(245, 245, 245, 0.7)',
+    backgroundColor: 'rgba(245, 245, 245, 0.8)',
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     padding: 20,
