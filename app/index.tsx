@@ -17,14 +17,9 @@ export default function ConfigScreen() {
   const [distancePerTurn, setDistancePerTurn] = useState('86'); // inches
 
   // Current input values
-  const [currentDrillWidth, setCurrentDrillWidth] = useState(drillWidth);
-  const [currentRowSpacing, setCurrentRowSpacing] = useState(rowSpacing);
+  const [currentWidth, setCurrentWidth] = useState(drillWidth);
+  const [currentSpacing, setCurrentSpacing] = useState(rowSpacing);
   const [currentDistance, setCurrentDistance] = useState(distancePerTurn);
-
-  // Refs for input fields
-  const drillWidthRef = useRef<TextInput>(null);
-  const rowSpacingRef = useRef<TextInput>(null);
-  const distancePerTurnRef = useRef<TextInput>(null);
 
   // Load persistent settings
   useEffect(() => {
@@ -34,9 +29,18 @@ export default function ConfigScreen() {
         const spacing = await AsyncStorage.getItem(STORAGE_KEYS.ROW_SPACING);
         const distance = await AsyncStorage.getItem(STORAGE_KEYS.DISTANCE_PER_TURN);
 
-        if (width) setDrillWidth(width);
-        if (spacing) setRowSpacing(spacing);
-        if (distance) setDistancePerTurn(distance);
+        if (width) {
+          setDrillWidth(width);
+          setCurrentWidth(width);
+        }
+        if (spacing) {
+          setRowSpacing(spacing);
+          setCurrentSpacing(spacing);
+        }
+        if (distance) {
+          setDistancePerTurn(distance);
+          setCurrentDistance(distance);
+        }
       } catch (error) {
         console.error('Error loading settings:', error);
       }
@@ -44,24 +48,12 @@ export default function ConfigScreen() {
     loadSettings();
   }, []);
 
-  const handleDrillWidthBlur = (e: any) => {
-    setDrillWidth(currentDrillWidth);
-  };
-
-  const handleRowSpacingBlur = (e: any) => {
-    setRowSpacing(currentRowSpacing);
-  };
-
-  const handleDistanceBlur = (e: any) => {
-    setDistancePerTurn(currentDistance);
-  };
-
   // Save settings and navigate to calibration
   const saveAndContinue = async () => {
     // Clean up and validate the input values
-    const cleanWidth = drillWidth.replace(/[^0-9.]/g, '');
-    const cleanSpacing = rowSpacing.replace(/[^0-9.]/g, '');
-    const cleanDistance = distancePerTurn.replace(/[^0-9.]/g, '');
+    const cleanWidth = currentWidth.replace(/[^0-9.]/g, '');
+    const cleanSpacing = currentSpacing.replace(/[^0-9.]/g, '');
+    const cleanDistance = currentDistance.replace(/[^0-9.]/g, '');
 
     // Basic validation for empty fields and number format
     if (!cleanWidth || !cleanSpacing || !cleanDistance || 
@@ -104,6 +96,11 @@ export default function ConfigScreen() {
       await AsyncStorage.setItem(STORAGE_KEYS.ROW_SPACING, cleanSpacing);
       await AsyncStorage.setItem(STORAGE_KEYS.DISTANCE_PER_TURN, cleanDistance);
       
+      // Update persistent state
+      setDrillWidth(cleanWidth);
+      setRowSpacing(cleanSpacing);
+      setDistancePerTurn(cleanDistance);
+      
       // Navigate to calibration screen
       router.push('/calibration');
     } catch (error) {
@@ -132,9 +129,17 @@ export default function ConfigScreen() {
             <Text style={styles.label}>Drill Width (ft):</Text>
             <View style={styles.inputContainer}>
               <TextInput
-                style={[styles.input, !drillWidth && styles.inputEmpty]}
-                value={drillWidth}
-                onChangeText={setCurrentDrillWidth}
+                style={styles.input}
+                defaultValue={drillWidth}
+                onChangeText={(text) => {
+                  const cleanText = text.replace(/[^0-9.]/g, '');
+                  setCurrentWidth(cleanText);
+                }}
+                onBlur={() => {
+                  if (!currentWidth) {
+                    setCurrentWidth(drillWidth);
+                  }
+                }}
                 keyboardType="decimal-pad"
                 editable={true}
                 textAlign="center"
@@ -146,9 +151,17 @@ export default function ConfigScreen() {
             <Text style={styles.label}>Row Spacing (in):</Text>
             <View style={styles.inputContainer}>
               <TextInput
-                style={[styles.input, !rowSpacing && styles.inputEmpty]}
-                value={rowSpacing}
-                onChangeText={setCurrentRowSpacing}
+                style={styles.input}
+                defaultValue={rowSpacing}
+                onChangeText={(text) => {
+                  const cleanText = text.replace(/[^0-9.]/g, '');
+                  setCurrentSpacing(cleanText);
+                }}
+                onBlur={() => {
+                  if (!currentSpacing) {
+                    setCurrentSpacing(rowSpacing);
+                  }
+                }}
                 keyboardType="decimal-pad"
                 editable={true}
                 textAlign="center"
@@ -160,9 +173,17 @@ export default function ConfigScreen() {
             <Text style={styles.label}>Distance per Turn (ft):</Text>
             <View style={styles.inputContainer}>
               <TextInput
-                style={[styles.input, !distancePerTurn && styles.inputEmpty]}
-                value={distancePerTurn}
-                onChangeText={setCurrentDistance}
+                style={styles.input}
+                defaultValue={distancePerTurn}
+                onChangeText={(text) => {
+                  const cleanText = text.replace(/[^0-9.]/g, '');
+                  setCurrentDistance(cleanText);
+                }}
+                onBlur={() => {
+                  if (!currentDistance) {
+                    setCurrentDistance(distancePerTurn);
+                  }
+                }}
                 keyboardType="decimal-pad"
                 editable={true}
                 textAlign="center"
@@ -250,9 +271,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 16,
     textAlign: 'right',
-  },
-  inputEmpty: {
-    borderColor: '#ff0000',
   },
   saveButton: {
     backgroundColor: '#2c6e49',
