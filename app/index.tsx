@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
+import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView, Platform, Pressable, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
@@ -17,14 +17,9 @@ export default function ConfigScreen() {
   const [distancePerTurn, setDistancePerTurn] = useState('86'); // inches
 
   // Current input values
-  const [currentDrillWidth, setCurrentDrillWidth] = useState(drillWidth);
-  const [currentRowSpacing, setCurrentRowSpacing] = useState(rowSpacing);
+  const [currentWidth, setCurrentWidth] = useState(drillWidth);
+  const [currentSpacing, setCurrentSpacing] = useState(rowSpacing);
   const [currentDistance, setCurrentDistance] = useState(distancePerTurn);
-
-  // Refs for input fields
-  const drillWidthRef = useRef<TextInput>(null);
-  const rowSpacingRef = useRef<TextInput>(null);
-  const distancePerTurnRef = useRef<TextInput>(null);
 
   // Load persistent settings
   useEffect(() => {
@@ -34,9 +29,18 @@ export default function ConfigScreen() {
         const spacing = await AsyncStorage.getItem(STORAGE_KEYS.ROW_SPACING);
         const distance = await AsyncStorage.getItem(STORAGE_KEYS.DISTANCE_PER_TURN);
 
-        if (width) setDrillWidth(width);
-        if (spacing) setRowSpacing(spacing);
-        if (distance) setDistancePerTurn(distance);
+        if (width) {
+          setDrillWidth(width);
+          setCurrentWidth(width);
+        }
+        if (spacing) {
+          setRowSpacing(spacing);
+          setCurrentSpacing(spacing);
+        }
+        if (distance) {
+          setDistancePerTurn(distance);
+          setCurrentDistance(distance);
+        }
       } catch (error) {
         console.error('Error loading settings:', error);
       }
@@ -44,24 +48,12 @@ export default function ConfigScreen() {
     loadSettings();
   }, []);
 
-  const handleDrillWidthBlur = (e: any) => {
-    setDrillWidth(currentDrillWidth);
-  };
-
-  const handleRowSpacingBlur = (e: any) => {
-    setRowSpacing(currentRowSpacing);
-  };
-
-  const handleDistanceBlur = (e: any) => {
-    setDistancePerTurn(currentDistance);
-  };
-
   // Save settings and navigate to calibration
   const saveAndContinue = async () => {
     // Clean up and validate the input values
-    const cleanWidth = drillWidth.replace(/[^0-9.]/g, '');
-    const cleanSpacing = rowSpacing.replace(/[^0-9.]/g, '');
-    const cleanDistance = distancePerTurn.replace(/[^0-9.]/g, '');
+    const cleanWidth = currentWidth.replace(/[^0-9.]/g, '');
+    const cleanSpacing = currentSpacing.replace(/[^0-9.]/g, '');
+    const cleanDistance = currentDistance.replace(/[^0-9.]/g, '');
 
     // Basic validation for empty fields and number format
     if (!cleanWidth || !cleanSpacing || !cleanDistance || 
@@ -104,6 +96,11 @@ export default function ConfigScreen() {
       await AsyncStorage.setItem(STORAGE_KEYS.ROW_SPACING, cleanSpacing);
       await AsyncStorage.setItem(STORAGE_KEYS.DISTANCE_PER_TURN, cleanDistance);
       
+      // Update persistent state
+      setDrillWidth(cleanWidth);
+      setRowSpacing(cleanSpacing);
+      setDistancePerTurn(cleanDistance);
+      
       // Navigate to calibration screen
       router.push('/calibration');
     } catch (error) {
@@ -113,52 +110,85 @@ export default function ConfigScreen() {
   };
 
   return (
+    <ImageBackground 
+      source={require('../assets/images/row.jpg')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+       <View style={styles.titleContainer}>
+            <Text style={styles.title}>Drill Configuration</Text>
+          </View>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Configuration</Text>
-        
         <View style={styles.section}>
           
           <View style={styles.inputRow}>
-            <Text style={styles.label}>Drill Width (feet):</Text>
-            <TextInput
-              ref={drillWidthRef}
-              style={[styles.input, !drillWidth && styles.inputEmpty]}
-              defaultValue={drillWidth}
-              onChangeText={setCurrentDrillWidth}
-              onBlur={handleDrillWidthBlur}
-              keyboardType="decimal-pad"
-              editable={true}
-            />
+            <Text style={styles.label}>Drill Width (ft):</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                defaultValue={drillWidth}
+                onChangeText={(text) => {
+                  const cleanText = text.replace(/[^0-9.]/g, '');
+                  setCurrentWidth(cleanText);
+                }}
+                onBlur={() => {
+                  if (!currentWidth) {
+                    setCurrentWidth(drillWidth);
+                  }
+                }}
+                keyboardType="decimal-pad"
+                editable={true}
+                textAlign="center"
+              />
+            </View>
           </View>
 
           <View style={styles.inputRow}>
             <Text style={styles.label}>Row Spacing (in):</Text>
-            <TextInput
-              ref={rowSpacingRef}
-              style={[styles.input, !rowSpacing && styles.inputEmpty]}
-              defaultValue={rowSpacing}
-              onChangeText={setCurrentRowSpacing}
-              onBlur={handleRowSpacingBlur}
-              keyboardType="decimal-pad"
-              editable={true}
-            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                defaultValue={rowSpacing}
+                onChangeText={(text) => {
+                  const cleanText = text.replace(/[^0-9.]/g, '');
+                  setCurrentSpacing(cleanText);
+                }}
+                onBlur={() => {
+                  if (!currentSpacing) {
+                    setCurrentSpacing(rowSpacing);
+                  }
+                }}
+                keyboardType="decimal-pad"
+                editable={true}
+                textAlign="center"
+              />
+            </View>
           </View>
 
           <View style={styles.inputRow}>
-            <Text style={styles.label}>Simulated Distance Per Turn (in):</Text>
-            <TextInput
-              ref={distancePerTurnRef}
-              style={[styles.input, !distancePerTurn && styles.inputEmpty]}
-              defaultValue={distancePerTurn}
-              onChangeText={setCurrentDistance}
-              onBlur={handleDistanceBlur}
-              keyboardType="decimal-pad"
-              editable={true}
-            />
+            <Text style={styles.label}>Distance per Turn (ft):</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                defaultValue={distancePerTurn}
+                onChangeText={(text) => {
+                  const cleanText = text.replace(/[^0-9.]/g, '');
+                  setCurrentDistance(cleanText);
+                }}
+                onBlur={() => {
+                  if (!currentDistance) {
+                    setCurrentDistance(distancePerTurn);
+                  }
+                }}
+                keyboardType="decimal-pad"
+                editable={true}
+                textAlign="center"
+              />
+            </View>
           </View>
         </View>
 
@@ -172,51 +202,67 @@ export default function ConfigScreen() {
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
   },
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
+  section: {
+    backgroundColor: 'rgba(245, 245, 245, 0.7)',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     padding: 20,
+    width: '90%',
+    alignSelf: 'center',
+  },
+  titleContainer: {
+    backgroundColor: 'rgba(80, 80, 80, 0.8)',
+    padding: 15,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#2c6e49',
-    marginBottom: 20,
+    color: '#fff',
     textAlign: 'center',
-  },
-  section: {
-    marginBottom: 20,
-    backgroundColor: '#f5f5f5',
-    padding: 15,
-    borderRadius: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2c6e49',
-    marginBottom: 10,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    width: '100%',
   },
   label: {
-    flex: 1,
+    width: '60%',
     fontSize: 16,
     color: '#333',
+    textAlign: 'right',
+    paddingRight: 10,
+    fontWeight: 'bold',
+  },
+  inputContainer: {
+    width: '40%',
+    paddingLeft: 10,
+    alignItems: 'center',
   },
   input: {
-    flex: 1,
+    width: 100,
     height: 40,
     borderWidth: 1,
     borderColor: '#ccc',
@@ -224,9 +270,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#fff',
     fontSize: 16,
-  },
-  inputEmpty: {
-    borderColor: '#ff0000',
+    textAlign: 'right',
   },
   saveButton: {
     backgroundColor: '#2c6e49',
@@ -234,13 +278,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 20,
+    borderWidth: 2,
+    borderColor: '#d4d4d4',
+    width: '60%',
+    alignSelf: 'center',
   },
   saveButtonPressed: {
     opacity: 0.8,
+    backgroundColor: '#1a4a2f',
   },
   saveButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  scrollContent: {
+    padding: 0,
   },
 });

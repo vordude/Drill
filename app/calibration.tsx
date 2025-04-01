@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView, Platform, Pressable, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, TextInput, ScrollView, KeyboardAvoidingView, Platform, Pressable, ImageBackground, Modal, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, router } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
@@ -11,7 +11,7 @@ const STORAGE_KEYS = {
   DISTANCE_PER_TURN: 'distance_per_turn',
 };
 
-const TURN_OPTIONS = [1, 10, 20, 30];
+const TURN_OPTIONS = [10, 20, 30, 40];
 
 export default function CalibrationScreen() {
   // Drill settings (loaded from storage)
@@ -20,12 +20,17 @@ export default function CalibrationScreen() {
   const [distancePerTurn, setDistancePerTurn] = useState('');
 
   // Calibration inputs
-  const [numberOfTurns, setNumberOfTurns] = useState('1');
+  const [numberOfTurns, setNumberOfTurns] = useState('10');
   const [rowsCaught, setRowsCaught] = useState('');
   const [seedWeight, setSeedWeight] = useState('');
 
   // Calculated result
   const [poundsPerAcre, setPoundsPerAcre] = useState(0);
+
+  // Additional state
+  const [showPicker, setShowPicker] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   // Load drill settings
   useEffect(() => {
@@ -64,7 +69,8 @@ export default function CalibrationScreen() {
     const totalPossibleRows = calculateTotalRows(width, spacing);
 
     if (rows > totalPossibleRows) {
-      alert(`Cannot catch more than ${totalPossibleRows} rows based on current settings`);
+      setAlertMessage(`The number of rows caught cannot exceed ${totalPossibleRows} based on your drill width (${width} feet) and row spacing (${spacing} inches) settings.`);
+      setShowAlert(true);
       return;
     }
 
@@ -135,50 +141,100 @@ export default function CalibrationScreen() {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
         >
-          <View style={[styles.section, { backgroundColor: 'rgba(255, 255, 255, 0.85)' }]}>
-            
+          <View style={styles.titleContainer}>
+              <Text style={styles.title}>Calibration</Text>
+            </View>
+          <View style={styles.section}>
+
             <View style={styles.inputRow}>
               <Text style={styles.label}>Number of Turns:</Text>
-              <View 
-                style={[styles.pickerContainer, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}
-                >
-                <Picker
-                  selectedValue={numberOfTurns}
-                  onValueChange={(value) => setNumberOfTurns(value.toString())}
-                  style={[styles.picker, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}
-                  itemStyle={{height: 50, fontSize: 16}}
+              {Platform.OS === 'ios' ? (
+                <View style={styles.inputContainer}>
+                  <Pressable 
+                    style={styles.pickerContainer}
+                    onPress={() => setShowPicker(true)}
                   >
-                  {TURN_OPTIONS.map((turns) => (
-                    <Picker.Item 
-                      key={turns} 
-                      label={turns.toString()} 
-                      value={turns.toString()}
-                    />
-                  ))}
-                </Picker>
+                    <Text style={styles.pickerText}>{numberOfTurns}</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <View style={styles.inputContainer}>
+                  <Pressable 
+                    style={styles.pickerContainer}
+                    onPress={() => setShowPicker(true)}
+                  >
+                    <Text style={styles.pickerText}>{numberOfTurns}</Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
+
+            <Modal
+              visible={showPicker}
+              transparent={true}
+              animationType="slide"
+              onRequestClose={() => setShowPicker(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>Select Number of Turns</Text>
+                    <Pressable onPress={() => setShowPicker(false)}>
+                      <Text style={styles.modalClose}>Done</Text>
+                    </Pressable>
+                  </View>
+                  <ScrollView style={styles.modalList}>
+                    {TURN_OPTIONS.map((turns) => (
+                      <Pressable
+                        key={turns}
+                        style={[
+                          styles.modalItem,
+                          turns.toString() === numberOfTurns && styles.modalItemSelected
+                        ]}
+                        onPress={() => {
+                          setNumberOfTurns(turns.toString());
+                          setShowPicker(false);
+                        }}
+                      >
+                        <Text style={[
+                          styles.modalItemText,
+                          turns.toString() === numberOfTurns && styles.modalItemTextSelected
+                        ]}>
+                          {turns}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+            </Modal>
+
+            <View style={styles.inputRow}>
+              <Text style={styles.label}>Rows Caught:</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={[styles.input, !rowsCaught && styles.inputEmpty]}
+                  value={rowsCaught}
+                  onChangeText={validateRowsCaught}
+                  keyboardType="number-pad"
+                  editable={true}
+                  textAlign="center"
+                />
               </View>
             </View>
 
             <View style={styles.inputRow}>
-              <Text style={styles.label}>Rows Caught:</Text>
-              <TextInput
-                style={[styles.input, !rowsCaught && styles.inputEmpty, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}
-                value={rowsCaught}
-                onChangeText={validateRowsCaught}
-                keyboardType="number-pad"
-                placeholder={`Max ${calculateTotalRows(parseFloat(drillWidth || '0'), parseFloat(rowSpacing || '1'))} rows`}
-              />
-            </View>
-
-            <View style={styles.inputRow}>
               <Text style={styles.label}>Seed Caught (lbs):</Text>
-              <TextInput
-                style={[styles.input, !seedWeight && styles.inputEmpty, { backgroundColor: 'rgba(255, 255, 255, 0.9)' }]}
-                value={seedWeight}
-                onChangeText={validateSeedWeight}
-                keyboardType="decimal-pad"
-                placeholder="Enter weight"
-              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={[styles.input, !seedWeight && styles.inputEmpty]}
+                  value={seedWeight}
+                  onChangeText={validateSeedWeight}
+                  keyboardType="decimal-pad"
+                  editable={true}
+                  textAlign="center"
+                />
+              </View>
             </View>
           </View>
 
@@ -187,7 +243,7 @@ export default function CalibrationScreen() {
             <Text style={styles.result}>{poundsPerAcre} lbs/acre</Text>
           </View>
 
-          <View style={[styles.settingsPreview, { backgroundColor: 'rgba(255, 255, 255, 0.85)' }]}>
+          <View style={[styles.settingsPreview, { backgroundColor: 'rgba(245, 245, 245, 0.85)' }]}>
             <Text style={styles.settingsTitle}>Current Settings</Text>
             <Text style={styles.settingsText}>Width: {drillWidth} feet</Text>
             <Text style={styles.settingsText}>Spacing: {rowSpacing} inches</Text>
@@ -196,6 +252,26 @@ export default function CalibrationScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal
+        visible={showAlert}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowAlert(false)}
+      >
+        <View style={styles.alertOverlay}>
+          <View style={styles.alertContent}>
+            <Text style={styles.alertTitle}>Invalid Row Count</Text>
+            <Text style={styles.alertMessage}>{alertMessage}</Text>
+            <Pressable 
+              style={styles.alertButton}
+              onPress={() => setShowAlert(false)}
+            >
+              <Text style={styles.alertButtonText}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -217,29 +293,52 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   section: {
-    marginBottom: 20,
     backgroundColor: 'rgba(245, 245, 245, 0.7)',
-    padding: 15,
-    borderRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    padding: 20,
+    width: '90%',
+    alignSelf: 'center',
+    marginBottom: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2c6e49',
-    marginBottom: 10,
+  titleContainer: {
+    backgroundColor: 'rgba(80, 80, 80, 0.8)',
+    padding: 15,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    width: '100%',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
   },
   label: {
-    flex: 1,
+    width: '60%',
     fontSize: 16,
     color: '#333',
+    textAlign: 'right',
+    paddingRight: 10,
+    fontWeight: 'bold',
+  },
+  inputContainer: {
+    width: '40%',
+    paddingLeft: 10,
+    alignItems: 'center',
   },
   input: {
-    flex: 1,
+    width: 100,
     height: 40,
     borderWidth: 1,
     borderColor: '#ccc',
@@ -247,27 +346,84 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#fff',
     fontSize: 16,
+    textAlign: 'center',
   },
   inputEmpty: {
     borderColor: '#ff0000',
   },
   pickerContainer: {
-    flex: 1,
+    width: 100,
+    height: 40,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     backgroundColor: '#fff',
-    height: 50,
     justifyContent: 'center',
-    paddingHorizontal: 2,
+    alignItems: 'center',
     overflow: 'hidden',
   },
-  picker: {
-    height: 50,
-    marginHorizontal: Platform.OS === 'android' ? 0 : -8,
-    width: '100%',
-    color: '#333',
+  pickerText: {
     fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
+  picker: {
+    width: 100,
+    height: 40,
+    color: '#333',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginTop: -10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '80%',
+    alignItems: 'center',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    width: '100%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modalClose: {
+    fontSize: 18,
+    color: '#2c6e49',
+    fontWeight: '600',
+  },
+  modalList: {
+    maxHeight: 300,
+    width: '100%',
+  },
+  modalItemSelected: {
+    backgroundColor: '#f0f0f0',
+  },
+  modalItemText: {
+    fontSize: 20,
+    color: '#333',
+  },
+  modalItemTextSelected: {
+    color: '#2c6e49',
+    fontWeight: '600',
   },
   resultSection: {
     alignItems: 'center',
@@ -288,19 +444,67 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   settingsPreview: {
-    backgroundColor: 'rgba(245, 245, 245, 0.7)',
+    backgroundColor: 'rgba(245, 245, 245, 0.85)',
     padding: 15,
     borderRadius: 10,
+    width: '60%',
+    alignSelf: 'center',
   },
   settingsTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
     color: '#2c6e49',
     marginBottom: 8,
+    textAlign: 'center',
   },
   settingsText: {
     fontSize: 14,
     color: '#333',
     marginBottom: 4,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  alertOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  alertContent: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    alignItems: 'center',
+  },
+  alertTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
+  alertMessage: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  alertButton: {
+    backgroundColor: '#2c6e49',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  alertButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalItem: {
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    alignItems: 'center',
   },
 }); 
