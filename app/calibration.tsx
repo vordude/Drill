@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(245, 245, 245, 0.85)',
     padding: 15,
     borderRadius: 10,
-    width: '55%',
+    width: '60%',
     alignSelf: 'center',
   },
   settingsTitle: {
