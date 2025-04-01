@@ -122,24 +122,22 @@ export default function ConfigScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+       <View style={styles.titleContainer}>
+            <Text style={styles.title}>Drill Configuration</Text>
+          </View>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Drill Configuration</Text>
-        </View>
-        
         <View style={styles.section}>
           
           <View style={styles.inputRow}>
-            <Text style={styles.label}>Drill Width (feet):</Text>
+            <Text style={styles.label}>Drill Width (ft):</Text>
             <View style={styles.inputContainer}>
               <TextInput
-                ref={drillWidthRef}
                 style={[styles.input, !drillWidth && styles.inputEmpty]}
-                defaultValue={drillWidth}
+                value={drillWidth}
                 onChangeText={setCurrentDrillWidth}
-                onBlur={handleDrillWidthBlur}
                 keyboardType="decimal-pad"
                 editable={true}
+                textAlign="center"
               />
             </View>
           </View>
@@ -148,28 +146,26 @@ export default function ConfigScreen() {
             <Text style={styles.label}>Row Spacing (in):</Text>
             <View style={styles.inputContainer}>
               <TextInput
-                ref={rowSpacingRef}
                 style={[styles.input, !rowSpacing && styles.inputEmpty]}
-                defaultValue={rowSpacing}
+                value={rowSpacing}
                 onChangeText={setCurrentRowSpacing}
-                onBlur={handleRowSpacingBlur}
                 keyboardType="decimal-pad"
                 editable={true}
+                textAlign="center"
               />
             </View>
           </View>
 
           <View style={styles.inputRow}>
-            <Text style={styles.label}>Simulated Distance Per Turn (in):</Text>
+            <Text style={styles.label}>Distance per Turn (ft):</Text>
             <View style={styles.inputContainer}>
               <TextInput
-                ref={distancePerTurnRef}
                 style={[styles.input, !distancePerTurn && styles.inputEmpty]}
-                defaultValue={distancePerTurn}
+                value={distancePerTurn}
                 onChangeText={setCurrentDistance}
-                onBlur={handleDistanceBlur}
                 keyboardType="decimal-pad"
                 editable={true}
+                textAlign="center"
               />
             </View>
           </View>
@@ -202,36 +198,28 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
+  section: {
+    backgroundColor: 'rgba(245, 245, 245, 0.7)',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     padding: 20,
+    width: '90%',
+    alignSelf: 'center',
   },
   titleContainer: {
-    backgroundColor: '#847b74',
+    backgroundColor: 'rgba(80, 80, 80, 0.8)',
     padding: 15,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-    width: '80%',
+    width: '90%',
     alignSelf: 'center',
+    marginTop: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
-  },
-  section: {
-    backgroundColor: 'rgba(245, 245, 245, 0.7)',
-    padding: 15,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    width: '80%',
-    alignSelf: 'center',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2c6e49',
-    marginBottom: 10,
   },
   inputRow: {
     flexDirection: 'row',
@@ -240,7 +228,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   label: {
-    width: '50%',
+    width: '60%',
     fontSize: 16,
     color: '#333',
     textAlign: 'right',
@@ -248,8 +236,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   inputContainer: {
-    width: '50%',
+    width: '40%',
     paddingLeft: 10,
+    alignItems: 'center',
   },
   input: {
     width: 100,
@@ -271,13 +260,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 20,
+    borderWidth: 2,
+    borderColor: '#d4d4d4',
+    width: '60%',
+    alignSelf: 'center',
   },
   saveButtonPressed: {
     opacity: 0.8,
+    backgroundColor: '#1a4a2f',
   },
   saveButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  scrollContent: {
+    padding: 0,
   },
 });
