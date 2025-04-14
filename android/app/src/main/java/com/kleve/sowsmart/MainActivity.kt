@@ -1,4 +1,4 @@
-package com.drill.calibration
+package com.kleve.sowsmart
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

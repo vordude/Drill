@@ -1,18 +1,19 @@
 import { Stack } from 'expo-router';
-import { useEffect } from 'react';
+import { useCallback } from 'react';
+import { View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  useEffect(() => {
-    SplashScreen.hideAsync();
+  const onLayoutRootView = useCallback(async () => {
+    await SplashScreen.hideAsync();
   }, []);
 
   return (
-    <>
+    <View style={{ flex: 1, backgroundColor: '#2c6e49' }} onLayout={onLayoutRootView}>
       <StatusBar style="light" backgroundColor="#2c6e49" />
       <Stack
         screenOptions={{
@@ -38,6 +39,6 @@ export default function RootLayout() {
           }}
         />
       </Stack>
-    </>
+    </View>
   );
 }
