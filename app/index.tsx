@@ -170,7 +170,7 @@ export default function ConfigScreen() {
           </View>
 
           <View style={styles.inputRow}>
-            <Text style={styles.label}>Distance per Turn (ft):</Text>
+            <Text style={styles.label}>Distance per Turn (in):</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
